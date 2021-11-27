@@ -24,6 +24,7 @@ class DBSample(QMainWindow):
         self.pushButton.clicked.connect(self.save_results)
         self.pushButton_2.clicked.connect(self.add_in_tabel)
         self.modified = {}
+        self.titles = None
 
     def add_in_tabel(self):
         cursor = self.connection.cursor()
@@ -48,7 +49,7 @@ class DBSample(QMainWindow):
                 data = cur.execute(f"SELECT * FROM coffee WHERE id = {i}").fetchone()
                 cur.execute(f"DELETE FROM coffee WHERE id = {i}")
                 cur.execute("INSERT INTO coffee VALUES (?, ?, ?, ?, ?, ?, ?)", data)
-            self.con.commit()
+            self.connection.commit()
 
     def closeEvent(self, event):
         self.connection.close()
