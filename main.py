@@ -46,8 +46,8 @@ class DBSample(QMainWindow):
             cur = self.connection.cursor()
             for i in ids:
                 data = cur.execute(f"SELECT * FROM coffee WHERE id = {i}").fetchone()
-                cur.execute(f"DELETE FROM films WHERE id = {i}")
-                cur.execute("INSERT INTO films VALUES (?, ?, ?, ?, ?, ?, ?)", data)
+                cur.execute(f"DELETE FROM coffee WHERE id = {i}")
+                cur.execute("INSERT INTO coffee VALUES (?, ?, ?, ?, ?, ?, ?)", data)
             self.con.commit()
 
     def closeEvent(self, event):
