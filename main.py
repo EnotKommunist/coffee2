@@ -2,7 +2,7 @@ import sqlite3
 import sys
 
 from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtWidgets import QMainWindow, QTableWidgetItem
 
 
@@ -23,16 +23,46 @@ class DBSample(QMainWindow):
                     i, j, QTableWidgetItem(str(elem)))
         self.pushButton.clicked.connect(self.save_results)
         self.pushButton_2.clicked.connect(self.add_in_tabel)
+        self.modified = {}
 
     def add_in_tabel(self):
-        query = f"INSERT INTO table_name ('id', 'sort_name', 'roasting', 'ground/in grains', 'taste description', 'coast', 'packing volume') VALUES ({self.lineEdit_1.text()}, {self.lineEdit_2.text()}, {self.lineEdit_3.text()}, {self.lineEdit_5.text()}, {self.lineEdit_4.text()}, {self.lineEdit_7.text()}, {self.lineEdit_6.text()})"
-        res = self.connection.cursor().execute(query).fetchall()
+        cursor = self.connection.cursor()
+        id = self.lineEdit.text()
+        sort_name = self.lineEdit_2.text()
+        roasting = self.lineEdit_3.text()
+        ground_grains = self.lineEdit_5.text()
+        taste_description = self.lineEdit_4.text()
+        coast = self.lineEdit_7.text()
+        packing_volume = self.lineEdit_6.text()
+        cursor.execute(f"""INSERT INTO coffee VALUES ({int(id)}, '{sort_name}', '{roasting}', '{ground_grains}', '{taste_description}', '{coast}', '{packing_volume}')""")
+        self.connection.commit()
 
     def save_results(self):
-        pass
+        rows = list(set(map(lambda x: x.row(), self.tableWidget.selectedItems())))
+        ids = [self.tableWidget.item(i, 0).text() for i in rows]
+        valid = QMessageBox.question(self, '', f"Действительно заменить элементы с id {', '.join(ids)}",
+                                     QMessageBox.Yes, QMessageBox.No)
+        if valid == QMessageBox.Yes:
+            cur = self.connection.cursor()
+            for i in ids:
+                data = cur.execute(f"SELECT * FROM coffee WHERE id = {i}").fetchone()
+                cur.execute(f"DELETE FROM films WHERE id = {i}")
+                cur.execute("INSERT INTO films VALUES (?, ?, ?, ?, ?, ?, ?)", data)
+            self.con.commit()
 
     def closeEvent(self, event):
         self.connection.close()
+
+
+sys._excepthook = sys.excepthook
+
+
+def exception_hook(exctype, value, traceback):
+    sys._excepthook(exctype, value, traceback)
+    sys.exit(1)
+
+
+sys.excepthook = exception_hook
 
 
 if __name__ == '__main__':
