@@ -34,7 +34,7 @@
      </rect>
     </property>
     <property name="text">
-     <string>сохранить</string>
+     <string>Обновить</string>
     </property>
    </widget>
    <widget class="QLineEdit" name="lineEdit">
@@ -209,29 +209,6 @@
     </property>
     <property name="text">
      <string>packing volume:</string>
-    </property>
-   </widget>
-   <widget class="QSpinBox" name="spinBox">
-    <property name="geometry">
-     <rect>
-      <x>600</x>
-      <y>230</y>
-      <width>42</width>
-      <height>22</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_8">
-    <property name="geometry">
-     <rect>
-      <x>440</x>
-      <y>230</y>
-      <width>151</width>
-      <height>21</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>id сохраняемого объекта:</string>
     </property>
    </widget>
   </widget>
