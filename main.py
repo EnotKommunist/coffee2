@@ -11,6 +11,7 @@ class DBSample(QMainWindow):
         super().__init__()
         uic.loadUi('addEditCoffeeForm.ui', self)
         self.connection = sqlite3.connect("coffe.db")
+        cur = self.connection.cursor()
         query = "SELECT * FROM coffee"
         res = self.connection.cursor().execute(query).fetchall()
         self.tableWidget.setColumnCount(7)
@@ -21,10 +22,25 @@ class DBSample(QMainWindow):
             for j, elem in enumerate(row):
                 self.tableWidget.setItem(
                     i, j, QTableWidgetItem(str(elem)))
-        self.pushButton.clicked.connect(self.save_results)
         self.pushButton_2.clicked.connect(self.add_in_tabel)
-        self.modified = {}
-        self.titles = None
+        self.tableWidget.cellChanged.connect(self.cell_changed)
+
+    def cell_changed(self, row, column):
+        item_change = self.tableWidget.currentItem().text()
+        rows = list(set(map(lambda x: x.row(), self.tableWidget.selectedItems())))
+        ids = [self.tableWidget.item(i, 0).text() for i in rows]
+        valid = QMessageBox.question(self, '', f"Действительно заменить элементы с id {', '.join(ids)}",
+                                     QMessageBox.Yes, QMessageBox.No)
+        if valid == QMessageBox.Yes:
+            cur = self.connection.cursor()
+            for i in ids:
+                data = cur.execute(f"SELECT * FROM coffee WHERE id = {i}").fetchone()
+                new_data = list(data)
+                new_data[column] = item_change
+                new_data = tuple(new_data)
+                cur.execute(f"DELETE FROM coffee WHERE id = {i}")
+                cur.execute("INSERT INTO coffee VALUES (?, ?, ?, ?, ?, ?, ?)", new_data)
+            self.connection.commit()
 
     def add_in_tabel(self):
         cursor = self.connection.cursor()
@@ -37,22 +53,6 @@ class DBSample(QMainWindow):
         packing_volume = self.lineEdit_6.text()
         cursor.execute(f"""INSERT INTO coffee VALUES ({int(id)}, '{sort_name}', '{roasting}', '{ground_grains}', '{taste_description}', '{coast}', '{packing_volume}')""")
         self.connection.commit()
-
-    def save_results(self):
-        rows = list(set(map(lambda x: x.row(), self.tableWidget.selectedItems())))
-        ids = [self.tableWidget.item(i, 0).text() for i in rows]
-        valid = QMessageBox.question(self, '', f"Действительно заменить элементы с id {', '.join(ids)}",
-                                     QMessageBox.Yes, QMessageBox.No)
-        if valid == QMessageBox.Yes:
-            cur = self.connection.cursor()
-            for i in ids:
-                data = cur.execute(f"SELECT * FROM coffee WHERE id = {i}").fetchone()
-                cur.execute(f"DELETE FROM coffee WHERE id = {i}")
-                cur.execute("INSERT INTO coffee VALUES (?, ?, ?, ?, ?, ?, ?)", data)
-            self.connection.commit()
-
-    def closeEvent(self, event):
-        self.connection.close()
 
 
 sys._excepthook = sys.excepthook
